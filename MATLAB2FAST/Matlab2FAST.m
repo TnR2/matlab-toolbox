@@ -373,6 +373,15 @@ function [line] = GetLineToWrite( line, FastPar, label, TemplateFile, value )
         writeVal = getWriteVal( FastPar.Val{indx2} );     
 
         idx = strfind( line, label ); %let's just take the line starting where the label is first listed            
+
+        % Use regex with word boundaries to find the label as an independent field, avoiding false matches inside quoted filenames
+        % If no match is found, keep the original idx from strfind as fallback.
+        regex_pattern = ['\<' regexptranslate('escape', label) '\>'];
+        regex_idx = regexp(line, regex_pattern, 'once');
+        if ~isempty(regex_idx)
+            idx = regex_idx;
+        end
+
         line = [writeVal '   ' line(idx(1):end)];            
 
     else
